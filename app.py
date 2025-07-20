@@ -10,19 +10,18 @@ st.session_state.setdefault("nombre", "")
 st.session_state.setdefault("telefono", "")
 st.session_state.setdefault("cantidad", 1)
 st.session_state.setdefault("estado_baterias", {})
-st.session_state.setdefault("reiniciar", False)
+st.session_state.setdefault("reiniciar_cliente", False)
 
-# 🔄 Si se solicitó reinicio, limpiar estado
-if st.session_state.reiniciar:
+# 🔄 Reiniciar si se pidió nuevo cliente
+if st.session_state.reiniciar_cliente:
     st.session_state.cliente_confirmado = False
     st.session_state.nombre = ""
     st.session_state.telefono = ""
     st.session_state.cantidad = 1
     st.session_state.estado_baterias = {}
-    st.session_state.reiniciar = False
-    st.experimental_rerun()
+    st.session_state.reiniciar_cliente = False
 
-# 📋 Formulario de cliente
+# 📋 Formulario del cliente
 if not st.session_state.cliente_confirmado:
     with st.form("formulario_cliente"):
         nombre = st.text_input("Nombre del cliente")
@@ -35,7 +34,6 @@ if not st.session_state.cliente_confirmado:
             st.session_state.telefono = telefono
             st.session_state.cantidad = cantidad
             st.session_state.cliente_confirmado = True
-            st.experimental_rerun()
         elif enviado:
             st.warning("Por favor, completa nombre y teléfono.")
 else:
@@ -53,20 +51,17 @@ else:
         marca = col1.text_input("Marca", key=f"marca_{i}")
         modelo = col2.text_input("Modelo", key=f"modelo_{i}")
 
-        if f"estado_{i}" not in st.session_state.estado_baterias:
-            st.session_state.estado_baterias[f"estado_{i}"] = "Pendiente"
-
         estado = st.empty()
         if st.button(f"Iniciar carga Batería {i+1}", key=f"btn_{i}"):
             inicio = time.strftime("%H:%M:%S")
             estado.markdown(f"🕒 Inicio: {inicio}<br>Marca: {marca}<br>Modelo: {modelo}", unsafe_allow_html=True)
-            for seg in range(10, -1, -1):  # Para prueba; cambia a 3600 para 1 hora
+            for seg in range(10, -1, -1):  # Para prueba, puedes ajustar a 3600
                 estado.markdown(f"⏳ Tiempo restante: <strong>{seg} segundos</strong>", unsafe_allow_html=True)
                 time.sleep(1)
             estado.markdown("✅ <strong>Carga completada</strong>", unsafe_allow_html=True)
             st.session_state.estado_baterias[f"estado_{i}"] = "Completada"
 
-    st.success("Todas las cargas activas. Puedes atender otro cliente cuando gustes.")
-    
+    st.success("Las cargas están en curso. Puedes atender otro cliente cuando lo desees.")
+
     if st.button("➕ Atender otro cliente"):
-        st.session_state.reiniciar = True
+        st.session_state.reiniciar_cliente = True
